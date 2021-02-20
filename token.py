@@ -1,0 +1,4 @@
+"""
+RemoteDesktopToken
+"""
+TelegramToken = ""

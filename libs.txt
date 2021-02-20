@@ -1,0 +1,14 @@
+1. pyautogui
+2. pytelegrambotapi
+3. pywin32 >> win32api
+4. psutil
+5. pyttsx3
+6. pygame
+7. platform
+8. ctypes
+9. os
+10. fnmatch
+11. requests
+12. subprocess
+13. random
+14. math
