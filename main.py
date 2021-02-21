@@ -126,7 +126,7 @@ class RemoteDesktop(object):
                         pass
 
         @self.bot.message_handler(commands=commands.MainC['Hotkey'])
-        def get_users(message):
+        def hotkey(message):
             """
             Adding button to keyboard
             text : str
@@ -147,7 +147,7 @@ class RemoteDesktop(object):
                         pass
 
         @self.bot.message_handler(commands=commands.MainC['GetLog'])
-        def get_users(message):
+        def get_log(message):
             """
             Returning ApiLog
             Using https://ipdata.co
