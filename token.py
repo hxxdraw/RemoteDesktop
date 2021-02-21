@@ -1,4 +1,0 @@
-"""
-RemoteDesktopToken
-"""
-TelegramToken = ""

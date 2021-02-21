@@ -8,7 +8,7 @@ class Api(object):
         :service: https://ipdata.co
         """
         self.service_url = "https://api.ipdata.co?api-key="
-        self.api_key = "e80f5e887499facfa70f182e3e28f389f645ad8554e63c6d152f9658"
+        self.api_key = "" # private key
 
     def GetLog(self):
         """

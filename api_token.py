@@ -1,0 +1,4 @@
+"""
+TelegramApi token
+"""
+token = ""

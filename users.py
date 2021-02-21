@@ -1,8 +1,8 @@
 """
-Main User Id >> "God"
-Main User Name >> "God"
-Other Users <dict> >> "[0] God; p(default user)"
+MainUserId : int
+MainUser : str
+Users <dict>
 """
-MainUserId = 0  # Your ID
-MainUser = "username"
+MainUserId = 821092678  # Your ID
+MainUser = "desolate"	# Username
 Users = {MainUserId: MainUser}
