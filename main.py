@@ -181,7 +181,7 @@ class RemoteDesktop(object):
                         pass
 
         @self.bot.message_handler(commands=[commands.MainC['Cmd']])
-        def StopPolling(message):
+        def shell(message):
             """
             Running shell command
             command : str
